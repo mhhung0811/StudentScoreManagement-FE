@@ -15,8 +15,27 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  
 }
+
+.filter-chip {
+  display: flex;
+  flex-direction: row;
+  padding-top: 10px;
+  gap: 5px;
+}
+
+.table-content {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 
 .delete {
   display: flex;

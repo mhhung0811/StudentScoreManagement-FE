@@ -13,6 +13,8 @@ import IconButton from '@mui/material/IconButton';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Chip from '@mui/material/Chip';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import './App.css';
 import { Combobox } from 'react-widgets';
 import { AlertDialog, DeleteSubjectTypeForm, SubjectFormDialog, SubjectTypeFormDialog, TranscriptFormDialog, UpdateSubjectFormDialog, UserFormDialog } from './components/form/form';
@@ -26,6 +28,8 @@ function createSubjectData(id, subjectTypeId, name, code, qt, th, gk, ck) {
 const BASE_URL = "http://localhost:8080/api"
 
 function App() {
+
+  const drawerWidth = 240;
 
   const [users, setUsers] = React.useState([]);
   const [user, setUser] = React.useState(null);
@@ -772,15 +776,14 @@ function App() {
 
   return (
     <div className="App">
-      <PermanentDrawerLeft/>
       {subject && <UpdateSubjectFormDialog
-        title="Subject"
-        subjecttypes={subjectTypes}
-        defaultsubject={subject}
-        handleClose={handleClose}
-        handleDelete={handleDeleteSubject}
-        onSubmit={handleUpdateSubject}
-        open={open}
+          title="Subject"
+          subjecttypes={subjectTypes}
+          defaultsubject={subject}
+          handleClose={handleClose}
+          handleDelete={handleDeleteSubject}
+          onSubmit={handleUpdateSubject}
+          open={open}
       />}
       <AlertDialog
         title={alertTitle}
@@ -788,127 +791,162 @@ function App() {
         open={openAlert}
         handleClose={handleCloseAlert}
       />
-      {transcriptId && <SearchBar searchKey={searchKey} setSearchKey={setSearchKey} handleSearch={handleSearch}/>}
-      <div className="filter-chip">
-        <Chip label="All" color={allChip ? "primary" : "default"} onClick={() => handleAllChipClick()}/>
-        <Chip label="Name" color={nameChip ? "primary" : "default"} onClick={() => handleChipClick("name")}/>
-        <Chip label="Year" color={yearChip ? "primary" : "default"} onClick={() => handleChipClick("year")}/>
-        <Chip label="Semester" color={semesterChip ? "primary" : "default"} onClick={() => handleChipClick("semester")}/>
-        <Chip label="Subject Name" color={subjectNameChip ? "primary" : "default"} onClick={() => handleChipClick("subjectName")}/>
-        <Chip label="Subject ID" color={subjectIdChip ? "primary" : "default"} onClick={() => handleChipClick("subjectId")}/>
-      </div>
-      <div className="utility">
-        <div className="filter">
-          <div className="username">
-            <div className='text'>Name:</div>
-            <Combobox 
-              className="usernameCbb" 
-              data={users}
-              dataKey="id"
-              textField="name"
-              value={user}
-              onSelect={handleSelectUser}
-              />
-          </div>
-          <div className="username">
-            <div className='text'>Year:</div>
-            <Combobox 
-              className="usernameCbb" 
-              data={years}
-              value={year}
-              onSelect={handleSelectYear}
-              />
-          </div>
-          <div className="username">
-            <div className='text'>Semester:</div>
-            <Combobox 
-              className="usernameCbb" 
-              data={semesters}
-              value={semester}
-              onSelect={handleSelectSemester}
-              />
-          </div>
-        </div>
-        <div className="delete">
-          <div className="button">
-            {user && <Button variant="outlined" color="error" onClick={() => handleDeleteUser(user.id)}>
-              Delete User
-            </Button>}
-          </div>
-          <div className="button">
-            {transcriptId && <Button variant="outlined" color="error" onClick={() => handleDeleteTranscript(transcriptId)}>
-              Delete Transcript
-            </Button>}
-          </div>
-          <div className="button">
-              <DeleteSubjectTypeForm
-                title="Subject Types"
-                content="Delete Subject Type"
-                subjecttypes={subjectTypes}
-                onSubmit={handleDeleteSubjectType}
-              />
-          </div>
-        </div>
-        <div className="add">
-          <div className='button'>
-            <UserFormDialog title="User" content="Add User" onSubmit={handleCreateUser}/>
-          </div>
-          <div className='button'>
-            {user && <TranscriptFormDialog title="Transcript" content="Add Transcript" onSubmit={handleCreateTranscript}/>}
-          </div>
-          <div className='button'>
-            <SubjectTypeFormDialog title="Subject Type" content="Add Subject Type" onSubmit={handleCreateSubjectType}/>
-          </div>
-          <div className='button'>
-            {transcriptId && <SubjectFormDialog title="Subject" content="Add Subject" subjecttypes={subjectTypes} onSubmit={handleCreateSubject}/>}
-          </div>
-        </div>
+
+      <div className="sidebar">
+        <PermanentDrawerLeft/>
       </div>
 
-      <div className="table">
-        <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Subject name</TableCell>
-              <TableCell align="right">Subject code</TableCell>
-              <TableCell align="right">QT</TableCell>
-              <TableCell align="right">TH</TableCell>
-              <TableCell align="right">GK</TableCell>
-              <TableCell align="right">CK</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {subjects.map((subject) => (
-              <TableRow
-                key={subject.name}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                hover={true}
-                onClick={(event) => handleSelectSubject(event, subject)}
-              >
-                <TableCell component="th" scope="row">
-                  {subject.name}
-                </TableCell>
-                <TableCell align="right">{subject.code}</TableCell>
-                <TableCell align="right">{subject.qt}</TableCell>
-                <TableCell align="right">{subject.th}</TableCell>
-                <TableCell align="right">{subject.gk}</TableCell>
-                <TableCell align="right">{subject.ck}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <div className="pagination">
-        <IconButton aria-label="back" disabled={!isBackable} color="primary" onClick={handlePreviousPage}>
-          <ArrowBackIosIcon/>
-        </IconButton>
-        <div className='pageNo'>{page}</div>
-        <IconButton aria-label="next" disabled={!isForwardable} color="primary" onClick={handleNextPage}>
-          <ArrowForwardIosIcon/>
-        </IconButton>
+      <div className="content">
+        <AppBar
+          position="fixed"
+          sx={{ padding: '8px', width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, bgcolor: 'background.default' }}
+        >
+          {transcriptId && 
+            <SearchBar 
+              searchKey={searchKey} 
+              setSearchKey={setSearchKey} 
+              handleSearch={handleSearch}/>
+          }
+          <div className="filter-chip">
+            <Chip label="All" color={allChip ? "primary" : "default"} onClick={() => handleAllChipClick()}/>
+            <Chip label="Name" color={nameChip ? "primary" : "default"} onClick={() => handleChipClick("name")}/>
+            <Chip label="Year" color={yearChip ? "primary" : "default"} onClick={() => handleChipClick("year")}/>
+            <Chip label="Semester" color={semesterChip ? "primary" : "default"} onClick={() => handleChipClick("semester")}/>
+            <Chip label="Subject Name" color={subjectNameChip ? "primary" : "default"} onClick={() => handleChipClick("subjectName")}/>
+            <Chip label="Subject ID" color={subjectIdChip ? "primary" : "default"} onClick={() => handleChipClick("subjectId")}/>
+        </div>
+        </AppBar>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
+          >
+        </Box>
+        <div className="utility">
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 15 }}
+        >
+        </Box>
+          <div className="filter">
+            <div className="username">
+              <div className='text'>Name:</div>
+              <Combobox 
+                className="usernameCbb" 
+                data={users}
+                dataKey="id"
+                textField="name"
+                value={user}
+                onSelect={handleSelectUser}
+                />
+            </div>
+            <div className="username">
+              <div className='text'>Year:</div>
+              <Combobox 
+                className="usernameCbb" 
+                data={years}
+                value={year}
+                onSelect={handleSelectYear}
+                />
+            </div>
+            <div className="username">
+              <div className='text'>Semester:</div>
+              <Combobox 
+                className="usernameCbb" 
+                data={semesters}
+                value={semester}
+                onSelect={handleSelectSemester}
+                />
+            </div>
+          </div>
+          <div className="delete">
+            <div className="button">
+              {user && <Button variant="outlined" color="error" onClick={() => handleDeleteUser(user.id)}>
+                Delete User
+              </Button>}
+            </div>
+            <div className="button">
+              {transcriptId && <Button variant="outlined" color="error" onClick={() => handleDeleteTranscript(transcriptId)}>
+                Delete Transcript
+              </Button>}
+            </div>
+            <div className="button">
+                <DeleteSubjectTypeForm
+                  title="Subject Types"
+                  content="Delete Subject Type"
+                  subjecttypes={subjectTypes}
+                  onSubmit={handleDeleteSubjectType}
+                />
+            </div>
+          </div>
+          <div className="add">
+            <div className='button'>
+              <UserFormDialog title="User" content="Add User" onSubmit={handleCreateUser}/>
+            </div>
+            <div className='button'>
+              {user && <TranscriptFormDialog title="Transcript" content="Add Transcript" onSubmit={handleCreateTranscript}/>}
+            </div>
+            <div className='button'>
+              <SubjectTypeFormDialog title="Subject Type" content="Add Subject Type" onSubmit={handleCreateSubjectType}/>
+            </div>
+            <div className='button'>
+              {transcriptId && <SubjectFormDialog title="Subject" content="Add Subject" subjecttypes={subjectTypes} onSubmit={handleCreateSubject}/>}
+            </div>
+          </div>
+        </div>
+
+        <div className="table-content">
+          <Box
+            component="main"
+            sx={{ flexGrow: 1, bgcolor: 'background.default', p: 15 }}
+          >
+          </Box>
+          <div className="table">
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Subject name</TableCell>
+                    <TableCell align="right">Subject code</TableCell>
+                    <TableCell align="right">QT</TableCell>
+                    <TableCell align="right">TH</TableCell>
+                    <TableCell align="right">GK</TableCell>
+                    <TableCell align="right">CK</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {subjects.map((subject) => (
+                    <TableRow
+                      key={subject.name}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      hover={true}
+                      onClick={(event) => handleSelectSubject(event, subject)}
+                    >
+                      <TableCell component="th" scope="row">
+                        {subject.name}
+                      </TableCell>
+                      <TableCell align="right">{subject.code}</TableCell>
+                      <TableCell align="right">{subject.qt}</TableCell>
+                      <TableCell align="right">{subject.th}</TableCell>
+                      <TableCell align="right">{subject.gk}</TableCell>
+                      <TableCell align="right">{subject.ck}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <div className="pagination">
+              <IconButton aria-label="back" disabled={!isBackable} color="primary" onClick={handlePreviousPage}>
+                <ArrowBackIosIcon/>
+              </IconButton>
+              <div className='pageNo'>{page}</div>
+              <IconButton aria-label="next" disabled={!isForwardable} color="primary" onClick={handleNextPage}>
+                <ArrowForwardIosIcon/>
+              </IconButton>
+            </div>
+          </div>
+        </div>
       </div>
-      </div>
+      
     </div>
   );
 }
