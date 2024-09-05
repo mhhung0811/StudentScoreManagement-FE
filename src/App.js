@@ -40,6 +40,13 @@ function App() {
   const [subject, setSubject] = React.useState();
   const [searchKey, setSearchKey] = React.useState("");
 
+  const [allChip, setAllChip] = React.useState(true);
+  const [nameChip, setNameChip] = React.useState(false);
+  const [yearChip, setYearChip] = React.useState(false);
+  const [semesterChip, setSemesterChip] = React.useState(false);
+  const [subjectNameChip, setSubjectNameChip] = React.useState(false);
+  const [subjectIdChip, setSubjectIdChip] = React.useState(false);
+
   const [open, setOpen] = React.useState(false);
   const [openAlert, setOpenAlert] = React.useState(false);
   const [alertTitle, setAlertTitle] = React.useState();
@@ -650,6 +657,51 @@ function App() {
     setPage(page + 1);
   }
 
+  const handleAllChipClick = () => {
+    setAllChip(true);
+    setNameChip(false);
+    setYearChip(false);
+    setSemesterChip(false);
+    setSubjectNameChip(false);
+    setSubjectIdChip(false);
+  }
+
+  const handleChipClick = (chip) => {
+    setAllChip(false);
+    switch(chip) {
+      case "name":
+        if (nameChip ==  true)
+          setNameChip(false);
+        else
+          setNameChip(true);
+        break;
+      case "year":
+        if (yearChip ==  true)
+          setYearChip(false);
+        else
+          setYearChip(true);
+        break;
+      case "semester":
+        if (semesterChip ==  true)
+          setSemesterChip(false);
+        else
+          setSemesterChip(true);
+        break;
+      case "subjectName":
+        if (subjectNameChip ==  true)
+          setSubjectNameChip(false);
+        else
+          setSubjectNameChip(true);
+        break;
+      case "subjectId":
+        if (subjectIdChip ==  true)
+          setSubjectIdChip(false);
+        else
+          setSubjectIdChip(true);
+        break;
+    }
+  }
+
   React.useEffect(() => {
     const fetchSearchSubjects = async (value) => {
       const requestOption = {
@@ -753,12 +805,12 @@ function App() {
         </IconButton>
       </Paper>}
       <div className="filter-chip">
-        <Chip label="All" color="primary" />
-        <Chip label="Name" color="default" />
-        <Chip label="Year" color="default" />
-        <Chip label="Semester" color="default" />
-        <Chip label="Subject Name" color="default" />
-        <Chip label="Subject ID" color="default" />
+        <Chip label="All" color={allChip ? "primary" : "default"} onClick={() => handleAllChipClick()}/>
+        <Chip label="Name" color={nameChip ? "primary" : "default"} onClick={() => handleChipClick("name")}/>
+        <Chip label="Year" color={yearChip ? "primary" : "default"} onClick={() => handleChipClick("year")}/>
+        <Chip label="Semester" color={semesterChip ? "primary" : "default"} onClick={() => handleChipClick("semester")}/>
+        <Chip label="Subject Name" color={subjectNameChip ? "primary" : "default"} onClick={() => handleChipClick("subjectName")}/>
+        <Chip label="Subject ID" color={subjectIdChip ? "primary" : "default"} onClick={() => handleChipClick("subjectId")}/>
       </div>
       <div className="utility">
         <div className="filter">
