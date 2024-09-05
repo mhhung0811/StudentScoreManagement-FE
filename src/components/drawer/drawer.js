@@ -1,8 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
@@ -13,10 +11,14 @@ import PersonIcon from '@mui/icons-material/Person';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import BookIcon from '@mui/icons-material/Book';
+import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 const drawerWidth = 240;
 
 export default function PermanentDrawerLeft() {
+    const navigate = useHistory();
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer
@@ -34,7 +36,7 @@ export default function PermanentDrawerLeft() {
         <Divider />
         <List>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate.push("/")}>
                 <ListItemIcon>
                   <PersonIcon/>
                 </ListItemIcon>
@@ -42,7 +44,7 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate.push("/transcript")}>
                 <ListItemIcon>
                   <TableRowsIcon/>
                 </ListItemIcon>
@@ -50,7 +52,7 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate.push("/subjecttype")}>
                 <ListItemIcon>
                   <MenuBookIcon/>
                 </ListItemIcon>
@@ -58,11 +60,12 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate.push("/subject")}>
                 <ListItemIcon>
                   <BookIcon/>
                 </ListItemIcon>
                 <ListItemText primary="Subject" />
+                <Link to="/subject"/>
               </ListItemButton>
             </ListItem>
         </List>

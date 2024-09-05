@@ -20,6 +20,11 @@ import { Combobox } from 'react-widgets';
 import { AlertDialog, DeleteSubjectTypeForm, SubjectFormDialog, SubjectTypeFormDialog, TranscriptFormDialog, UpdateSubjectFormDialog, UserFormDialog } from './components/form/form';
 import SearchBar from './components/searchBar/searchBar';
 import PermanentDrawerLeft from './components/drawer/drawer';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom/cjs/react-router-dom.min';
+import UserPage from './page/user';
+import TranscriptPage from './page/transcript';
+import SubjectTypePage from './page/subjecttype';
+import SubjectPage from './page/subject';
 
 function createSubjectData(id, subjectTypeId, name, code, qt, th, gk, ck) {
   return { id, subjectTypeId, name, code, qt, th, gk, ck };
@@ -775,7 +780,8 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <Router>
+      <div className="App">
       {subject && <UpdateSubjectFormDialog
           title="Subject"
           subjecttypes={subjectTypes}
@@ -821,7 +827,25 @@ function App() {
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
           >
         </Box>
-        <div className="utility">
+        <div className='main'>
+          <Switch>
+            <Route exact path="/">
+              <UserPage/>
+            </Route>
+            <Route exact path="/transcript">
+              <TranscriptPage/>
+            </Route>
+            <Route exact path="/subjecttype">
+              <SubjectTypePage/>
+            </Route>
+            <Route exact path="/subject">
+              <SubjectPage/>
+            </Route>
+          </Switch>
+        </div>
+
+
+        {/* <div className="utility">
         <Box
           component="main"
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 15 }}
@@ -944,10 +968,10 @@ function App() {
               </IconButton>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
-      
     </div>
+    </Router>
   );
 }
 
