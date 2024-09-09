@@ -16,7 +16,7 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 const drawerWidth = 240;
 
-export default function PermanentDrawerLeft() {
+export default function PermanentDrawerLeft( {setState, resetChips} ) {
     const navigate = useHistory();
 
   return (
@@ -36,7 +36,7 @@ export default function PermanentDrawerLeft() {
         <Divider />
         <List>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate.push("/")}>
+              <ListItemButton onClick={() => {navigate.push("/"); setState("user"); resetChips()}}>
                 <ListItemIcon>
                   <PersonIcon/>
                 </ListItemIcon>
@@ -44,7 +44,7 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate.push("/transcript")}>
+              <ListItemButton onClick={() => {navigate.push("/transcript"); setState("transcript"); resetChips()}}>
                 <ListItemIcon>
                   <TableRowsIcon/>
                 </ListItemIcon>
@@ -52,7 +52,7 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate.push("/subjecttype")}>
+              <ListItemButton onClick={() => {navigate.push("/subjecttype"); setState("subjecttype"); resetChips()}}>
                 <ListItemIcon>
                   <MenuBookIcon/>
                 </ListItemIcon>
@@ -60,7 +60,7 @@ export default function PermanentDrawerLeft() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate.push("/subject")}>
+              <ListItemButton onClick={() => {navigate.push("/subject"); setState("subject"); resetChips()}}>
                 <ListItemIcon>
                   <BookIcon/>
                 </ListItemIcon>

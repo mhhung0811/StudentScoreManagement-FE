@@ -36,6 +36,8 @@ function App() {
 
   const drawerWidth = 240;
 
+  const [searchState, setSearchState] = React.useState("user");
+
   const [users, setUsers] = React.useState([]);
   const [user, setUser] = React.useState(null);
   const [years, setYears] = React.useState([]);
@@ -799,28 +801,39 @@ function App() {
       />
 
       <div className="sidebar">
-        <PermanentDrawerLeft/>
+        <PermanentDrawerLeft setState={setSearchState} resetChips={handleAllChipClick}/>
       </div>
 
       <div className="content">
         <AppBar
           position="fixed"
-          sx={{ padding: '8px', width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, bgcolor: 'background.default' }}
-        >
-          {transcriptId && 
+          sx={{display: 'flex', flexDirection: 'row', padding: '8px', width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, bgcolor: 'background.default' }}
+        > 
+          <div>
             <SearchBar 
               searchKey={searchKey} 
               setSearchKey={setSearchKey} 
               handleSearch={handleSearch}/>
-          }
-          <div className="filter-chip">
-            <Chip label="All" color={allChip ? "primary" : "default"} onClick={() => handleAllChipClick()}/>
-            <Chip label="Name" color={nameChip ? "primary" : "default"} onClick={() => handleChipClick("name")}/>
-            <Chip label="Year" color={yearChip ? "primary" : "default"} onClick={() => handleChipClick("year")}/>
-            <Chip label="Semester" color={semesterChip ? "primary" : "default"} onClick={() => handleChipClick("semester")}/>
-            <Chip label="Subject Name" color={subjectNameChip ? "primary" : "default"} onClick={() => handleChipClick("subjectName")}/>
-            <Chip label="Subject ID" color={subjectIdChip ? "primary" : "default"} onClick={() => handleChipClick("subjectId")}/>
-        </div>
+            
+            <div className="filter-chip">
+              <Chip label="All" color={allChip ? "primary" : "default"} onClick={() => handleAllChipClick()}/>
+              {(searchState != "subjecttype") && <Chip label="Name" color={nameChip ? "primary" : "default"} onClick={() => handleChipClick("name")}/>}
+              {(searchState == "transcript" || searchState == "subject") && <Chip label="Year" color={yearChip ? "primary" : "default"} onClick={() => handleChipClick("year")}/>}
+              {(searchState == "transcript" || searchState == "subject") && <Chip label="Semester" color={semesterChip ? "primary" : "default"} onClick={() => handleChipClick("semester")}/>}
+              {(searchState == "subjecttype" || searchState == "subject") && <Chip label="Subject Name" color={subjectNameChip ? "primary" : "default"} onClick={() => handleChipClick("subjectName")}/>}
+              {(searchState == "subjecttype" || searchState == "subject") && <Chip label="Subject ID" color={subjectIdChip ? "primary" : "default"} onClick={() => handleChipClick("subjectId")}/>}
+            </div>
+          </div>
+          <div>
+            <div className="add">
+                <div className='button'>
+                  {(searchState == "user") && <UserFormDialog title="User" content="Add User" onSubmit={handleCreateUser}/>}
+                  {(searchState == "transcript") && <TranscriptFormDialog title="Transcript" content="Add Transcript" onSubmit={handleCreateTranscript}/>}
+                  {(searchState == "subjecttype") && <SubjectTypeFormDialog title="Subject Type" content="Add Subject Type" onSubmit={handleCreateSubjectType}/>}
+                  {(searchState == "subject") && <SubjectFormDialog title="Subject" content="Add Subject" subjecttypes={subjectTypes} onSubmit={handleCreateSubject}/>}
+                </div>
+            </div>
+          </div>
         </AppBar>
         <Box
           component="main"

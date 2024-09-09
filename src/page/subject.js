@@ -9,7 +9,7 @@ const SubjectPage = () => {
             >
             </Box>
             <div>
-                subject
+                
             </div>
         </div>
     )
