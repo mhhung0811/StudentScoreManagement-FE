@@ -1,22 +1,10 @@
 import 'react-widgets'
 import "react-widgets/styles.css";
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Chip from '@mui/material/Chip';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import './App.css';
-import { Combobox } from 'react-widgets';
 import { AlertDialog, DeleteSubjectTypeForm, SubjectFormDialog, SubjectTypeFormDialog, TranscriptFormDialog, UpdateSubjectFormDialog, UserFormDialog } from './components/form/form';
 import SearchBar from './components/searchBar/searchBar';
 import PermanentDrawerLeft from './components/drawer/drawer';
@@ -25,6 +13,8 @@ import UserPage from './page/user';
 import TranscriptPage from './page/transcript';
 import SubjectTypePage from './page/subjecttype';
 import SubjectPage from './page/subject';
+import { fetchSearchUser } from './util/fetch';
+
 
 function createSubjectData(id, subjectTypeId, name, code, qt, th, gk, ck) {
   return { id, subjectTypeId, name, code, qt, th, gk, ck };
@@ -36,6 +26,11 @@ function App() {
 
   const drawerWidth = 240;
 
+  const [data, setData] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [isClick, setClick] = React.useState(0);
+  
   const [searchState, setSearchState] = React.useState("user");
 
   const [users, setUsers] = React.useState([]);
@@ -528,115 +523,8 @@ function App() {
     setAlertTitle();
   }
 
-  const handleSearch = () => {
-    if (searchKey == "") {
-      const fetchTranscript = async () => {
-        try {
-          const transcriptResponse = await fetch(`${BASE_URL}/transcript?userId=${user.id}&year=${year}&semester=${semester}`);
-          if (!transcriptResponse.ok) {
-            throw new Error('Failed to fetch transcript');
-          }
-          const transcriptData = await transcriptResponse.json();
-  
-          setTranscriptId(transcriptData.id);
-  
-          const subjectsResponse = await fetch(`${BASE_URL}/subject/${transcriptData.id}`);
-          if (!subjectsResponse.ok) {
-            throw new Error('Failed to fetch subjects');
-          }
-          const subjectsData = await subjectsResponse.json();
-          
-          const res = [];
-          if (subjectsData && Array.isArray(subjectsData)) {
-            for (const subject of subjectsData) {
-              try {
-                const subjectType = await fetchSubjectType(subject.subjectTypeId);
-                const obj = createSubjectData(
-                  subject.id,
-                  subjectType.id,
-                  subjectType.name, 
-                  subjectType.code, 
-                  subject.scoreQT, 
-                  subject.scoreTH, 
-                  subject.scoreGK, 
-                  subject.scoreCK
-                );
-                res.push(obj);
-              } catch (e) {
-                console.error(`Error processing subject with ID ${subject.id}:`, e);
-              }
-            }
-          }
-          setMaxPage(0);
-          setPage(0)
-          setBackable(false);
-          setForwardable(false);
-          setSubjects(res);
-          // console.log(res);
-        } catch (e) {
-          console.error('Error fetching transcript or subjects:', e);
-        }
-      }
-  
-      fetchTranscript();
-    }
-    else {
-      const fetchSearchSubjects = async () => {
-        const requestOption = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-             'pageNo': 0,
-             'pageSize' : 5
-            })
-        };
-        try {
-          const response = await fetch(`${BASE_URL}/subject/search?transcriptId=${transcriptId}&key=${searchKey}`, requestOption);
-          if (!response.ok) {
-            // throw new Error("Fail to create subject");
-            setAlertTitle("Subject");
-            setAlertContent(`Not found any with ${searchKey}`);
-            setOpenAlert(true);
-          }
-          const retrieveData = await response.json();
-          const res = []
-          if (retrieveData.content && Array.isArray(retrieveData.content)) {
-            for (const subject of retrieveData.content) {
-              try {
-                const subjectType = await fetchSubjectType(subject.subjectTypeId);
-                const obj = createSubjectData (
-                  subject.id,
-                  subjectType.id,
-                  subjectType.name, 
-                  subjectType.code, 
-                  subject.scoreQT, 
-                  subject.scoreTH, 
-                  subject.scoreGK, 
-                  subject.scoreCK
-                )
-                res.push(obj);
-              } catch (e) {
-                console.error(`Error processing subject with ID ${subject.id}:`, e);
-              }
-            }
-
-            setMaxPage(retrieveData.totalPages);
-            setPage(0);
-            setBackable(false);
-            if (maxPage > 1) {
-              setForwardable(true);
-            }
-            else 
-              setForwardable(false)
-            setSubjects(res);
-          }
-        } catch (e) {
-          console.error('Error fetching transcript or subjects:', e);
-        }
-      }
-
-      fetchSearchSubjects();
-    }
+  const handleSearch = () => {    
+    setClick(isClick + 1);
   }
 
   const handlePreviousPage = () => {
@@ -654,17 +542,17 @@ function App() {
   }
 
   const handleNextPage = () => {
-    if (page + 1 <= minPage)
+  if (page + 1 <= minPage)
       setBackable(false);
-    else
+  else
       setBackable(true);
 
-    if (page + 1 >= maxPage)
+  if (page + 1 >= maxPage)
       setForwardable(false);
-    else
+  else
       setForwardable(true);
 
-    setPage(page + 1);
+  setPage(page + 1);
   }
 
   const handleAllChipClick = () => {
@@ -712,74 +600,91 @@ function App() {
     }
   }
 
+  // React.useEffect(() => {
+  //   const fetchSearchSubjects = async (value) => {
+  //     const requestOption = {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //          'pageNo': value,
+  //          'pageSize' : 5
+  //         })
+  //     };
+
+  //     setSubjects([]);
+  //     try {
+  //       const response = await fetch(`${BASE_URL}/subject/search?transcriptId=${transcriptId}&key=${searchKey}`, requestOption);
+  //       if (!response.ok) {
+  //         // throw new Error("Fail to create subject");
+  //         setAlertTitle("Subject");
+  //         setAlertContent(`Not found any with ${searchKey}`);
+  //         setOpenAlert(true);
+  //       }
+  //       const retrieveData = await response.json();
+  //       const res = []
+  //       if (retrieveData.content && Array.isArray(retrieveData.content)) {
+  //         for (const subject of retrieveData.content) {
+  //           try {
+  //             const subjectType = await fetchSubjectType(subject.subjectTypeId);
+  //             const obj = createSubjectData (
+  //               subject.id,
+  //               subjectType.id,
+  //               subjectType.name, 
+  //               subjectType.code, 
+  //               subject.scoreQT, 
+  //               subject.scoreTH, 
+  //               subject.scoreGK, 
+  //               subject.scoreCK
+  //             )
+  //             res.push(obj);
+  //           } catch (e) {
+  //             console.error(`Error processing subject with ID ${subject.id}:`, e);
+  //           }
+  //         }
+
+  //         setMaxPage(retrieveData.totalPages - 1);
+  //         console.log(maxPage);
+  //         setSubjects(res);
+  //       }
+  //     } catch (e) {
+  //       console.error('Error fetching transcript or subjects:', e);
+  //     }
+  //   }
+  //   fetchSearchSubjects(page)
+  // }, [page])
+
+  // React.useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     const response = await fetch( BASE_URL + '/user');
+  //     const users = await response.json();
+  //     setUsers(users);
+  //   }
+  //   const fetchSubjectTypes = async () => {
+  //     const response = await fetch( BASE_URL + '/subjecttype');
+  //     const subjecttypes = await response.json();
+  //     setSubjectTypes(subjecttypes);
+  //   }
+
+  //   fetchUsers();
+  //   fetchSubjectTypes();
+  // }, []);
+
+  const fetchUsersData = async () => {
+    try {
+        setIsLoading(true);
+        const data = await fetchSearchUser(searchKey);
+        setData(data);
+    } catch (e) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
   React.useEffect(() => {
-    const fetchSearchSubjects = async (value) => {
-      const requestOption = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-           'pageNo': value,
-           'pageSize' : 5
-          })
-      };
+      fetchUsersData();
 
-      setSubjects([]);
-      try {
-        const response = await fetch(`${BASE_URL}/subject/search?transcriptId=${transcriptId}&key=${searchKey}`, requestOption);
-        if (!response.ok) {
-          // throw new Error("Fail to create subject");
-          setAlertTitle("Subject");
-          setAlertContent(`Not found any with ${searchKey}`);
-          setOpenAlert(true);
-        }
-        const retrieveData = await response.json();
-        const res = []
-        if (retrieveData.content && Array.isArray(retrieveData.content)) {
-          for (const subject of retrieveData.content) {
-            try {
-              const subjectType = await fetchSubjectType(subject.subjectTypeId);
-              const obj = createSubjectData (
-                subject.id,
-                subjectType.id,
-                subjectType.name, 
-                subjectType.code, 
-                subject.scoreQT, 
-                subject.scoreTH, 
-                subject.scoreGK, 
-                subject.scoreCK
-              )
-              res.push(obj);
-            } catch (e) {
-              console.error(`Error processing subject with ID ${subject.id}:`, e);
-            }
-          }
-
-          setMaxPage(retrieveData.totalPages - 1);
-          console.log(maxPage);
-          setSubjects(res);
-        }
-      } catch (e) {
-        console.error('Error fetching transcript or subjects:', e);
-      }
-    }
-    fetchSearchSubjects(page)
-  }, [page])
-
-  React.useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await fetch( BASE_URL + '/user');
-      const users = await response.json();
-      setUsers(users);
-    }
-    const fetchSubjectTypes = async () => {
-      const response = await fetch( BASE_URL + '/subjecttype');
-      const subjecttypes = await response.json();
-      setSubjectTypes(subjecttypes);
-    }
-
-    fetchUsers();
-    fetchSubjectTypes();
-  }, []);
+  }, [isClick]);
 
   return (
     <Router>
@@ -843,7 +748,7 @@ function App() {
         <div className='main'>
           <Switch>
             <Route exact path="/">
-              <UserPage/>
+              <UserPage data={data}/>
             </Route>
             <Route exact path="/transcript">
               <TranscriptPage/>

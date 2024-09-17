@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { AlertDialog, UserFormDialog } from '../components/form/form';
+import { UserTable } from '../components/table/table';
 
 import Box from '@mui/material/Box';
-
 const BASE_URL = "http://localhost:8080/api"
 
-const UserPage = () => {
-
+const UserPage = ({data}) => {
     const [openAlert, setOpenAlert] = React.useState(false);
     const [alertTitle, setAlertTitle] = React.useState();
     const [alertContent, setAlertContent] = React.useState();
@@ -51,19 +50,14 @@ const UserPage = () => {
                 open={openAlert}
                 handleClose={handleCloseAlert}
             />
-            <Box
-                component="main"
-                sx={{ flexGrow: 1, bgcolor: 'background.default', p: 1 }}
-            >
-            </Box>
-            <div>
-                <div className="utility">
-                    <Box
-                        component="main"
-                        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 15 }}
-                        >
-                    </Box>
-                </div>
+            <div style={{display: 'flex', flexDirection: 'row', width: '100%'}}>
+                <Box
+                    component="main"
+                    sx={{ flexGrow: 1, bgcolor: 'background.default', p: 15 }}
+                >
+                </Box>
+                {<UserTable data={data}/>}
+                {/* {isLoading && <div>Loading...</div>} */}
 
                 {/* <div className="table-content">
                 <Box

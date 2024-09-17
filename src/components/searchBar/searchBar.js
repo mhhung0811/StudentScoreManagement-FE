@@ -12,7 +12,7 @@ function SearchBar({searchKey, setSearchKey, handleSearch}) {
         >
         <InputBase
           sx={{ ml: 1, flex: 1 }}
-          placeholder="Search subject"
+          placeholder="Search"
           inputProps={{ 'aria-label': 'search' }}
           value={searchKey}
           onChange={e => setSearchKey(e.target.value)}
