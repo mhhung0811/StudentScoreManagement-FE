@@ -13,7 +13,10 @@ import UserPage from './page/user';
 import TranscriptPage from './page/transcript';
 import SubjectTypePage from './page/subjecttype';
 import SubjectPage from './page/subject';
-import { fetchSearchUser } from './util/fetch';
+import { fetchSearchTranscript, fetchSearchUser } from './util/fetch';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import IconButton from '@mui/material/IconButton';
 
 
 function createSubjectData(id, subjectTypeId, name, code, qt, th, gk, ck) {
@@ -26,7 +29,7 @@ function App() {
 
   const drawerWidth = 240;
 
-  const [data, setData] = React.useState(null);
+  const [tabledata, setTableData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [isClick, setClick] = React.useState(0);
@@ -144,10 +147,10 @@ function App() {
           }
         }
         setSubjects(res);
-        setPage(0);
-        setBackable(false);
-        setForwardable(false);
-        setMaxPage(0);
+        // setPage(0);
+        // setBackable(false);
+        // setForwardable(false);
+        // setMaxPage(0);
         // console.log(res);
       } catch (e) {
         console.error('Error fetching transcript or subjects:', e);
@@ -542,17 +545,16 @@ function App() {
   }
 
   const handleNextPage = () => {
-  if (page + 1 <= minPage)
-      setBackable(false);
-  else
-      setBackable(true);
+    if (page + 1 <= minPage)
+        setBackable(false);
+    else
+        setBackable(true);
 
-  if (page + 1 >= maxPage)
-      setForwardable(false);
-  else
-      setForwardable(true);
-
-  setPage(page + 1);
+    if (page + 1 >= maxPage)
+        setForwardable(false);
+    else
+        setForwardable(true);
+    setPage(page + 1);
   }
 
   const handleAllChipClick = () => {
@@ -598,6 +600,12 @@ function App() {
           setSubjectIdChip(true);
         break;
     }
+  }
+
+  const clearPageState = () => {
+    handleAllChipClick();
+    setPage(0);
+    setSearchKey("");
   }
 
   // React.useEffect(() => {
@@ -672,8 +680,50 @@ function App() {
   const fetchUsersData = async () => {
     try {
         setIsLoading(true);
-        const data = await fetchSearchUser(searchKey);
-        setData(data);
+        
+        await fetchSearchUser({key: searchKey, page: page})
+          .then(retrieveData => {
+            setTableData(retrieveData.data);
+            setMaxPage(retrieveData.pageSize - 1);
+            if (page < retrieveData.pageSize - 1) {
+              setForwardable(true);
+            }
+            else {
+              setForwardable(false);
+            }
+            if (page > minPage) {
+              setBackable(true);
+            }
+            else {
+              setBackable(false);
+            }
+          });
+    } catch (e) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
+    }
+  }
+  const fetchTranscriptsData = async () => {
+    try {      
+        setIsLoading(true);
+        await fetchSearchTranscript({key: searchKey, name: (allChip)?true:nameChip, semester: (allChip)?true:semesterChip, year: (allChip)?true:yearChip, page: page})
+          .then(retrieveData => {
+            setTableData(retrieveData.res);
+            setMaxPage(retrieveData.pageSize - 1);
+            if (page < retrieveData.pageSize - 1) {
+              setForwardable(true);
+            }
+            else {
+              setForwardable(false);
+            }
+            if (page > minPage) {
+              setBackable(true);
+            }
+            else {
+              setBackable(false);
+            }
+          })
     } catch (e) {
         setError(e.message);
     } finally {
@@ -682,9 +732,20 @@ function App() {
   }
 
   React.useEffect(() => {
-      fetchUsersData();
+    switch (searchState) {
+      case "user":
+        fetchUsersData();
+        break;
+      case "transcript":        
+        fetchTranscriptsData();
+        break;
+      case "subjecttype":
+        break;
+      case "subject":
+        break;
+    }
 
-  }, [isClick]);
+  }, [isClick, page, searchState]);
 
   return (
     <Router>
@@ -706,7 +767,7 @@ function App() {
       />
 
       <div className="sidebar">
-        <PermanentDrawerLeft setState={setSearchState} resetChips={handleAllChipClick}/>
+        <PermanentDrawerLeft setState={setSearchState} resetChips={clearPageState}/>
       </div>
 
       <div className="content">
@@ -748,18 +809,27 @@ function App() {
         <div className='main'>
           <Switch>
             <Route exact path="/">
-              <UserPage data={data}/>
+              <UserPage data={tabledata}/>
             </Route>
             <Route exact path="/transcript">
-              <TranscriptPage/>
+              <TranscriptPage data={tabledata}/>
             </Route>
             <Route exact path="/subjecttype">
-              <SubjectTypePage/>
+              <SubjectTypePage data={tabledata}/>
             </Route>
             <Route exact path="/subject">
-              <SubjectPage/>
+              <SubjectPage data={tabledata}/>
             </Route>
           </Switch>
+        </div>
+        <div className="pagination">
+            <IconButton aria-label="back" disabled={!isBackable} color="primary" onClick={handlePreviousPage}>
+            <ArrowBackIosIcon/>
+            </IconButton>
+            <div className='pageNo'>{page}</div>
+            <IconButton aria-label="next" disabled={!isForwardable} color="primary" onClick={handleNextPage}>
+            <ArrowForwardIosIcon/>
+            </IconButton>
         </div>
 
 
