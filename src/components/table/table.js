@@ -140,8 +140,8 @@ export function SubjectTable({data}) {
                             </TableCell>
                             <TableCell align="right">{subject.semester}</TableCell>
                             <TableCell align="right">{subject.year}</TableCell>
-                            <TableCell align="right">{subject.stname}</TableCell>
-                            <TableCell align="right">{subject.stid}</TableCell>
+                            <TableCell align="right">{subject.subjectName}</TableCell>
+                            <TableCell align="right">{subject.subjectCode}</TableCell>
                         </TableRow>
                         ))}
                     </TableBody>

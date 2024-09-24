@@ -13,7 +13,7 @@ import UserPage from './page/user';
 import TranscriptPage from './page/transcript';
 import SubjectTypePage from './page/subjecttype';
 import SubjectPage from './page/subject';
-import { fetchSearchTranscript, fetchSearchUser } from './util/fetch';
+import { fetchSearchSubject, fetchSearchSubjectType, fetchSearchTranscript, fetchSearchUser } from './util/fetch';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import IconButton from '@mui/material/IconButton';
@@ -730,6 +730,58 @@ function App() {
         setIsLoading(false);
     }
   }
+  const fetchSubjectTypesData = async () => {
+    try {
+      setIsLoading(true);
+      await fetchSearchSubjectType({key: searchKey, name: (allChip)?true:subjectNameChip, code: (allChip)?true:subjectIdChip, page: page})
+        .then(retrieveData => {
+          setTableData(retrieveData.data);
+          setMaxPage(retrieveData.pageSize - 1);
+          if (page < retrieveData.pageSize - 1) {
+            setForwardable(true);
+          }
+          else {
+            setForwardable(false);
+          }
+          if (page > minPage) {
+            setBackable(true);
+          }
+          else {
+            setBackable(false);
+          }
+        });
+    } catch (e) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
+    }
+  }
+  const fetchSubjectsData = async () => {
+    try {      
+        setIsLoading(true);
+        await fetchSearchSubject({key: searchKey, name: (allChip)?true:nameChip, semester: (allChip)?true:semesterChip, year: (allChip)?true:yearChip, subjectname: (allChip)?true:subjectNameChip, subjectcode: (allChip)?true:subjectIdChip, page: page})
+          .then(retrieveData => {
+            setTableData(retrieveData.res);
+            setMaxPage(retrieveData.pageSize - 1);
+            if (page < retrieveData.pageSize - 1) {
+              setForwardable(true);
+            }
+            else {
+              setForwardable(false);
+            }
+            if (page > minPage) {
+              setBackable(true);
+            }
+            else {
+              setBackable(false);
+            }
+          })
+    } catch (e) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   React.useEffect(() => {
     switch (searchState) {
@@ -740,8 +792,10 @@ function App() {
         fetchTranscriptsData();
         break;
       case "subjecttype":
+        fetchSubjectTypesData();
         break;
       case "subject":
+        fetchSubjectsData();
         break;
     }
 
